@@ -1,0 +1,22 @@
+{
+  "name": "noobchain",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "node ./index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dicegamer/axaChain.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dicegamer/axaChain/issues"
+  },
+  "homepage": "https://github.com/dicegamer/axaChain#readme",
+  "dependencies": {
+    "openchain": "^0.2.4"
+  }
+}
