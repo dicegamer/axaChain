@@ -1,14 +1,18 @@
 // var openchain = require("openchain");
 const Wallet = require("./Classes/Wallet");
 
-var testWallet = new Wallet("0123456789abcdef0123456789abcdef");
+var testWallet = new Wallet("0123456789abcdef0123456789abcdea");
 var balance = {'debt':undefined,'earning':undefined};
 
 testWallet.getDebt().then(result => (balance.debt = result.balance.toString()));
 testWallet.getEarning().then(result => (balance.earning = result.balance.toString()));
 setTimeout(function(){
     console.log(balance);
-}, 400);
+    testWallet.createDebt(10000).then(result => {
+        console.log(result);
+        
+    });
+}, 500);
 
 
 

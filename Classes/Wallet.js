@@ -4,6 +4,23 @@ const Config = require("../config.json");
 var masterWallet = new Wallet(Config.masterWalletSeed);
 var client = new openchain.ApiClient(Config.serverURL);
 
+var makeTransaction = function (senderWallet, receiverWallet, assetPath, price, typeMsg){
+    return client.initialize().then(function () {
+        return new openchain.TransactionBuilder(client)
+            .addSigningKey(signer)
+            .setMetadata({ "memo": ""+typeMsg+" : Issued through NodeJS" })
+            // Take 100 units of the asset from the issuance path
+            .updateAccountRecord(senderWallet.getPath(), assetPath, -price);
+    })
+    .then(function (transactionBuilder) {
+        // Add 100 units of the asset to the target wallet path
+        return transactionBuilder.updateAccountRecord(receiverWallet.getPath(), assetPath, price);
+    })
+    .then(function (transactionBuilder) {
+        return transactionBuilder.submit();
+    })
+    .then(function (result) { return result });
+}
 
 
 function Wallet(seedPhrase) {
@@ -11,26 +28,6 @@ function Wallet(seedPhrase) {
     this.address = this.pk.publicKey.toAddress();
 
     var signer = new openchain.MutationSigner(this.pk);
-
-    function makeTransaction (senderWallet, receiverWallet, assetPath, price){
-        client.initialize().then(function () {
-            return new openchain.TransactionBuilder(client)
-                .addSigningKey(signer)
-                .setMetadata({ "memo": "Issued through NodeJS" })
-                // Take 100 units of the asset from the issuance path
-                .updateAccountRecord(senderWallet.getPath(), assetPath, -price);
-        })
-        .then(function (transactionBuilder) {
-            // Add 100 units of the asset to the target wallet path
-            return transactionBuilder.updateAccountRecord(receiverWallet.getPath(), assetPath, price);
-        })
-        .then(function (transactionBuilder) {
-            return transactionBuilder.submit();
-        })
-        .then(function (result) { console.log(result); });
-    }
-
-
 }
 
 Wallet.prototype.getPath = function () {
@@ -47,15 +44,12 @@ Wallet.prototype.getEarning = function () {
 
 
 
-
-
-
-Wallet.prototype.receiveDebt = function () {
-    
+Wallet.prototype.makePayment = function (price) {
+    return makeTransaction(this, masterWallet, Config.debtAsset, price)
 }
 
-Wallet.prototype.receiveEarning = function () {
-
+Wallet.prototype.createDebt = function (price) {
+    return makeTransaction(masterWallet, this, Config.debtAsset, price, "Debt creation")
 }
 
 
