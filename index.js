@@ -1,13 +1,33 @@
-var openchain = require("openchain");
+// var openchain = require("openchain");
+const Wallet = require("./Classes/Wallet");
 
-var client = new openchain.ApiClient("http://localhost:8080/");
+var testWallet = new Wallet("0123456789abcdef0123456789abcdef");
+var balance = {'debt':undefined,'earning':undefined};
 
-client.getAccountRecord(
-    // Account path
-    "/p2pkh/Xat6UaXpQE9Dxv6rLtxY1peBkzC1SQDiEX/",
-    // Asset path
-    "/asset/p2pkh/XcDCGPMtdrKxodQ4soFyYfDmr78gTvJ9jN/")
-    .then(function (result) {
-        console.log("Balance: " + result.balance.toString());
-    }
-);
+testWallet.getDebt().then(result => (balance.debt = result.balance.toString()));
+testWallet.getEarning().then(result => (balance.earning = result.balance.toString()));
+setTimeout(function(){
+    console.log(balance);
+}, 400);
+
+
+
+// var signer = new openchain.MutationSigner(testWallet.pk);
+// client.initialize()
+// .then(function () {
+//     // Create a new transaction builder
+//     return new openchain.TransactionBuilder(client)
+//         .addSigningKey(signer)
+//         .setMetadata({ "memo": "Issued through NodeJS" })
+//         // Take 100 units of the asset from the issuance path
+//         .updateAccountRecord(testWallet.getPath(), asset, -100);
+// })
+// .then(function (transactionBuilder) {
+//     // Add 100 units of the asset to the target wallet path
+//     return transactionBuilder.updateAccountRecord(testWallet2.getPath(), asset, 100);
+// })
+// .then(function (transactionBuilder) {
+//     // Submit the transaction
+//     return transactionBuilder.submit();
+// })
+// .then(function (result) { console.log(result); });
