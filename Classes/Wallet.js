@@ -4,10 +4,11 @@ const Config = require("../config.json");
 var masterWallet = new Wallet(Config.masterWalletSeed);
 var client = new openchain.ApiClient(Config.serverURL);
 
-var makeTransaction = function (senderWallet, receiverWallet, assetPath, price, typeMsg){
-    return client.initialize().then(function () {
+var makeTransaction = function (senderWallet, receiverWallet, assetPath, price, typeMsg, callback){
+    client.initialize()
+    .then(function () {
         return new openchain.TransactionBuilder(client)
-            .addSigningKey(signer)
+            .addSigningKey(senderWallet.signer)
             .setMetadata({ "memo": ""+typeMsg+" : Issued through NodeJS" })
             // Take 100 units of the asset from the issuance path
             .updateAccountRecord(senderWallet.getPath(), assetPath, -price);
@@ -19,37 +20,45 @@ var makeTransaction = function (senderWallet, receiverWallet, assetPath, price, 
     .then(function (transactionBuilder) {
         return transactionBuilder.submit();
     })
-    .then(function (result) { return result });
+    .then(function (result){
+        callback(result);
+    });
 }
-
 
 function Wallet(seedPhrase) {
     this.pk = bitcore.HDPrivateKey.fromSeed(seedPhrase, "openchain");
     this.address = this.pk.publicKey.toAddress();
-
-    var signer = new openchain.MutationSigner(this.pk);
+    this.signer = new openchain.MutationSigner(this.pk);
 }
 
 Wallet.prototype.getPath = function () {
     return "/p2pkh/"+this.address+"/";
 }
 
-Wallet.prototype.getDebt = function () {
-    return client.getAccountRecord(this.getPath(),Config.debtAsset);
+Wallet.prototype.getBalance = function (callback) {
+    var tmp = this.getPath();
+    client.getAccountRecord(tmp,Config.debtAsset).then(function(result){
+        client.getAccountRecord(tmp,Config.earningAsset).then(function(result2){
+            callback({'debt':result.balance.toString(),'earning':result2.balance.toString()});
+        });
+    });
 }
 
-Wallet.prototype.getEarning = function () {
-    return client.getAccountRecord(this.getPath(),Config.earningAsset);
+Wallet.prototype.makePayment = function (price, callback) {
+    makeTransaction(this, masterWallet, Config.debtAsset, price, "Debt payment", callback);
+}
+
+Wallet.prototype.createDebt = function (price, callback) {
+    makeTransaction(masterWallet, this, Config.debtAsset, price, "Debt creation", callback);
 }
 
 
-
-Wallet.prototype.makePayment = function (price) {
-    return makeTransaction(this, masterWallet, Config.debtAsset, price)
+Wallet.prototype.consumeEarning = function (price, callback) {
+    makeTransaction(this, masterWallet, Config.earningAsset, price, "Earning consumption", callback);
 }
 
-Wallet.prototype.createDebt = function (price) {
-    return makeTransaction(masterWallet, this, Config.debtAsset, price, "Debt creation")
+Wallet.prototype.createEarning = function (price, callback) {
+    makeTransaction(masterWallet, this, Config.earningAsset, price, "Earning creation", callback);
 }
 
 

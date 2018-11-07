@@ -2,36 +2,32 @@
 const Wallet = require("./Classes/Wallet");
 
 var testWallet = new Wallet("0123456789abcdef0123456789abcdea");
-var balance = {'debt':undefined,'earning':undefined};
 
-testWallet.getDebt().then(result => (balance.debt = result.balance.toString()));
-testWallet.getEarning().then(result => (balance.earning = result.balance.toString()));
-setTimeout(function(){
-    console.log(balance);
-    testWallet.createDebt(10000).then(result => {
-        console.log(result);
-        
-    });
-}, 500);
+//testWallet.createDebt(1000, function(result){console.log(result)});
+//testWallet.getBalance(function(result){console.log(result);});
 
 
 
-// var signer = new openchain.MutationSigner(testWallet.pk);
-// client.initialize()
-// .then(function () {
-//     // Create a new transaction builder
-//     return new openchain.TransactionBuilder(client)
-//         .addSigningKey(signer)
-//         .setMetadata({ "memo": "Issued through NodeJS" })
-//         // Take 100 units of the asset from the issuance path
-//         .updateAccountRecord(testWallet.getPath(), asset, -100);
-// })
-// .then(function (transactionBuilder) {
-//     // Add 100 units of the asset to the target wallet path
-//     return transactionBuilder.updateAccountRecord(testWallet2.getPath(), asset, 100);
-// })
-// .then(function (transactionBuilder) {
-//     // Submit the transaction
-//     return transactionBuilder.submit();
-// })
-// .then(function (result) { console.log(result); });
+var mysql = require('mysql');
+var connection = mysql.createConnection({
+  host     : '51.75.121.28',
+  user     : 'axa_db',
+  password : 'axa_db',
+  database : 'axa'
+});
+ 
+connection.connect(function(err) {
+    if (err) {
+      console.error('error connecting: ' + err.stack);
+      return;
+    }
+   
+    //console.log('connected as id ' + connection.threadId);
+  });
+ 
+connection.query('SELECT id, Nom, Prenom from clients', function (error, results, fields) {
+  if (error) throw error;
+  results.forEach(element => console.log(element))
+});
+ 
+connection.end();
