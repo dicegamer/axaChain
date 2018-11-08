@@ -38,9 +38,9 @@ var srv = http.createServer(function(req,res){
         var userSeed = url.parse(req.url, true).query['user'];
         console.log(userSeed + " : asking for balance");
         userWallet = new Wallet(userSeed);
-        userWallet.getBalance(function(travellerBalance){
-            console.log({'host':hostBalance, 'traveller':travellerBalance});
-            res.end(JSON.stringify({'host':hostBalance, 'traveller':travellerBalance}));
+        userWallet.getBalance(function(balance){
+            console.log(balance);
+            res.end(JSON.stringify(balance));
         });
     }
 });
