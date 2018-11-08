@@ -17,6 +17,9 @@
   },
   "homepage": "https://github.com/dicegamer/axaChain#readme",
   "dependencies": {
+    "cheerio": "^1.0.0-rc.2",
+    "jquery": "^3.3.1",
+    "jsdom": "^13.0.0",
     "mysql": "^2.16.0",
     "openchain": "^0.2.4"
   }
