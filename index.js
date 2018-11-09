@@ -46,6 +46,77 @@ const Wallet = require("./Classes/Wallet");
 // });
 // srv.listen(9999);
 
+
+/////////////////////////////////////////////////////////////
+
+
+// function twoDigits(d) {
+//     if(0 <= d && d < 10) return "0" + d.toString();
+//     if(-10 < d && d < 0) return "-0" + (-1*d).toString();
+//     return d.toString();
+// }
+
+// Date.prototype.toMysqlFormat = function() {
+//     return this.getUTCFullYear() + "-" + twoDigits(1 + this.getUTCMonth()) + "-" + twoDigits(this.getUTCDate()) + " " + twoDigits(this.getUTCHours()) + ":" + twoDigits(this.getUTCMinutes()) + ":" + twoDigits(this.getUTCSeconds());
+// };
+
+// var mysql = require('mysql');
+// var connection = mysql.createConnection({
+//     host: '51.75.121.28',
+//     user: 'axa_db',
+//     password: 'axa_db',
+//     database: 'axa'
+// });
+
+// var connection2 = mysql.createConnection({
+//     host: '51.75.121.28',
+//     user: 'axa_db',
+//     password: 'axa_db',
+//     database: 'axa'
+// });
+
+// connection.connect(function (err) {
+//     if (err) {
+//         console.error('error connecting: ' + err.stack);
+//         return;
+//     }
+// });
+
+// connection2.connect(function (err) {
+//     if (err) {
+//         console.error('error connecting: ' + err.stack);
+//         return;
+//     }
+// });
+
+// connection.query('SELECT id, Wallet_Credit from clients', function (error, results, fields) {
+//     if (error) throw error;
+//     results.forEach(element => {
+//         currentWallet = new Wallet(element['Wallet_Credit']);
+//         currentWallet.getBalance(function (balance) {
+//             connection2.query("INSERT into facture(wallet, dateEmission, avoir, dette, idBonhomme) values('"+element['Wallet_Credit']+"', '"+new Date().toMysqlFormat() +"', '"+balance.earning+"', '"+balance.debt+"','"+element['id']+"')",function (error, results2, fields) {
+//                 if (error) throw error;
+//                 if(element === results[results.length -1])connection2.end();
+                
+//             })
+//             if (balance.debt <= balance.earning) {
+                
+//             }
+//             console.log(balance.debt);
+//             console.log(new Date().getTime());
+//         });
+//     });
+// });
+
+// connection.end();
+
+
+
+////////////////////////////////////////////////
+
+
+
+
 var mysql = require('mysql');
 var connection = mysql.createConnection({
     host: '51.75.121.28',
@@ -61,15 +132,31 @@ connection.connect(function (err) {
     }
 });
 
-connection.query('SELECT nom, Wallet_Credit from clients', function (error, results, fields) {
+connection.query('SELECT id, Wallet_Credit from clients', function (error, results, fields) {
     if (error) throw error;
     results.forEach(element => {
         currentWallet = new Wallet(element['Wallet_Credit']);
         currentWallet.getBalance(function (balance) {
-            if (balance.debt <= balance.earning) {
+            console.log(balance);
+            console.log(""+balance.debt +" "+ balance.earning );
+            console.log(balance.debt <= balance.earning);
+            if (balance.debt <= balance.earning && balance.earning >0 ) {
+                console.log(balance.debt <= balance.earning);
                 
+                currentWallet.consumeEarning(balance.earning-balance.debt, function(params) {
+                    console.log(params);
+                })
             }
-            console.log(balance.debt);
+            else if(balance.earning >0){
+                currentWallet.consumeEarning(balance.earning, function(params) {
+                    console.log(params);
+                })
+            }
+            if(balance.debt >0 ) {
+                currentWallet.makePayment(balance.debt, function(params) {
+                    console.log(params);
+                });
+            }
         });
     });
 });
