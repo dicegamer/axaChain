@@ -5,6 +5,7 @@ var masterWallet = new Wallet(Config.masterWalletSeed);
 var client = new openchain.ApiClient(Config.serverURL);
 
 var makeTransaction = function (senderWallet, receiverWallet, assetPath, price, typeMsg, callback){
+    console.log(senderWallet);
     client.initialize()
     .then(function () {
         return new openchain.TransactionBuilder(client)
@@ -21,6 +22,7 @@ var makeTransaction = function (senderWallet, receiverWallet, assetPath, price, 
         return transactionBuilder.submit();
     })
     .then(function (result){
+        console.log("End Make transaction : "+typeMsg);
         callback(result);
     });
 }
@@ -54,6 +56,7 @@ Wallet.prototype.createDebt = function (price, callback) {
 
 
 Wallet.prototype.consumeEarning = function (price, callback) {
+    console.log("Calling consumeEarning");
     makeTransaction(this, masterWallet, Config.earningAsset, price, "Earning consumption", callback);
 }
 
